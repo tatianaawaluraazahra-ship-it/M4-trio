@@ -32,7 +32,7 @@ static void log_dec_u32(uint32_t value) {
 
 __attribute__((noreturn)) void kernel_panic_at(const char *file, int line, const char *reason, uint64_t code) {
     uint64_t rflags = cpu_read_rflags();
-    cli(); 
+    __asm__ volatile("cli"); 
 
     log_writeln("");
     log_writeln("================ MCSOS KERNEL PANIC ================");
@@ -59,7 +59,7 @@ __attribute__((noreturn)) void kernel_panic_at(const char *file, int line, const
     log_writeln("state=halted");
     log_writeln("====================================================");
 
-    hang();
+    __asm__ volatile("hang: jmp hang");
     
     for (;;) {
         __asm__ volatile ("hlt");

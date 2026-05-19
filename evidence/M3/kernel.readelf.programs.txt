@@ -7,7 +7,7 @@ Program Headers:
   Type           Offset             VirtAddr           PhysAddr
                  FileSiz            MemSiz              Flags  Align
   LOAD           0x0000000000001000 0xffffffff80100000 0xffffffff80100000
-                 0x0000000000000880 0x0000000000000880  R E    0x1000
+                 0x0000000000000820 0x0000000000000820  R E    0x1000
   LOAD           0x0000000000002000 0xffffffff80101000 0xffffffff80101000
                  0x0000000000000201 0x0000000000000201  R      0x1000
   LOAD           0x0000000000003000 0xffffffff80102000 0xffffffff80102000

@@ -46,5 +46,5 @@ void kmain(void) {
     log_writeln("[M3] ready for QEMU smoke test and GDB audit");
 #endif
 
-    hang();
+    __asm__ volatile("hang: jmp hang");
 }
