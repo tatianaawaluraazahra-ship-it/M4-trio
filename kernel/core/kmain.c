@@ -1,52 +1,47 @@
-#include <mcsos/kernel/version.h>
-#include <mcsos/kernel/log.h>
-#include <mcsos/kernel/panic.h>
-#include <mcsos/arch/idt.h>
 #include <stdint.h>
+#include <pic.h>
+#include <pit.h>
 
-// Deklarasi fungsi eksternal peninggalan M2/M3 agar tidak bergantung pada header yang hilang
-extern uint64_t cpu_read_rflags(void);
-extern void cpu_halt_forever(void);
+// Deklarasi fungsi inisialisasi eksternal bawaan kernel kamu
+extern void serial_init(void);
+extern void x86_64_idt_init(void);
 
-extern char __kernel_start[];
-extern char __kernel_end[];
+// Fungsi manipulasi CPU inline assembly aman
+static inline void cpu_cli(void) {
+    __asm__ volatile ("cli" ::: "memory");
+}
 
-static void m4_selftest(void) {
-    KERNEL_ASSERT(__kernel_end > __kernel_start);
-    KERNEL_ASSERT(sizeof(uintptr_t) == 8u);
-    KERNEL_ASSERT(sizeof(x86_64_idt_entry_t) == 16u);
-    KERNEL_ASSERT(x86_64_idt_base_for_test() != 0u);
-    KERNEL_ASSERT(x86_64_idt_limit_for_test() == 4095u);
-    log_writeln("[M4] selftest: IDT invariants passed");
+static inline void cpu_sti(void) {
+    __asm__ volatile ("sti" ::: "memory");
 }
 
 void kmain(void) {
-    log_init();
-    log_write(MCSOS_NAME);
-    log_write(" ");
-    log_write(MCSOS_VERSION);
-    log_write(" ");
-    log_write(MCSOS_MILESTONE);
-    log_writeln(" kernel entered");
-    
-    log_key_value_hex64("kernel_start", (uint64_t)(uintptr_t)__kernel_start);
-    log_key_value_hex64("kernel_end", (uint64_t)(uintptr_t)__kernel_end);
-    log_key_value_hex64("rflags_before_idt", cpu_read_rflags());
-    
-    x86_64_idt_init();
-    m4_selftest();
-    
-#ifdef MCSOS_M4_TRIGGER_BREAKPOINT
-    log_writeln("[M4] triggering intentional breakpoint exception");
-    x86_64_trigger_breakpoint_for_test();
-    log_writeln("[M4] returned from breakpoint handler");
-#endif
+    // 1. cli -> Matikan interupsi global terlebih dahulu untuk keamanan
+    cpu_cli();
 
-#ifdef MCSOS_M4_TRIGGER_PANIC
-    KERNEL_PANIC("intentional M4 panic test", 0x4D43534F533034u);
-#else
-    log_writeln("[M4] IDT and exception dispatch path installed");
-    log_writeln("[M4] ready for QEMU smoke test and GDB audit");
-    cpu_halt_forever();
-#endif
+    // 2. serial_init -> Nyalakan komunikasi log serial
+    serial_init();
+
+    // 3. idt_init -> Pasang tabel gerbang interupsi (IDT)
+    x86_64_idt_init();
+
+    // 4. pic_remap -> Atur ulang pemetaan jalur interupsi PIC
+    pic_remap(0x20, 0x28);
+
+    // 5. pic_mask_all -> Tutup seluruh jalur IRQ hardware sebagai safe default
+    pic_mask_all();
+
+    // 6. pic_unmask_irq0 -> Buka gerbang khusus untuk IRQ0 (Timer PIT)
+    pic_unmask_irq(0);
+
+    // 7. pit_configure -> Set detak jam internal ke frekuensi 100 Hz
+    pit_configure_hz(100);
+
+    // 8. sti -> Jalur infrastruktur siap, nyalakan kembali interupsi global
+    cpu_sti();
+
+    // 9. hlt loop -> Loop abadi menghemat daya CPU sambil menunggu detak jam masuk
+    while (1) {
+        __asm__ volatile ("hlt");
+    }
 }

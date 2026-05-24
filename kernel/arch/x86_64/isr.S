@@ -131,3 +131,30 @@ x86_64_exception_stubs:
     .quad isr_stub_30
     .quad isr_stub_31
 .size x86_64_exception_stubs, . - x86_64_exception_stubs
+
+# Makro otomatis untuk membuat stub interupsi perangkat keras (Tanpa Error Code)
+.macro irq_stub num
+.global isr_stub_\num
+isr_stub_\num:
+    pushq $0                 # Dummy error code agar stack tetap sejajar
+    pushq \num               # Masukkan nomor vektor interupsi
+    jmp x86_64_exception_stubs
+.endm
+
+# Daftarkan vektor 32 sampai 47 untuk IRQ PIC
+irq_stub 32
+irq_stub 33
+irq_stub 34
+irq_stub 35
+irq_stub 36
+irq_stub 37
+irq_stub 38
+irq_stub 39
+irq_stub 40
+irq_stub 41
+irq_stub 42
+irq_stub 43
+irq_stub 44
+irq_stub 45
+irq_stub 46
+irq_stub 47
