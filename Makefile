@@ -36,3 +36,4 @@ m8-all: m8-kmem-host-test m8-audit
 run: | $(BUILD_DIR)
 	@echo "Menjalankan QEMU Smoke Test..."
 	@echo "M8 checkpoint reached"
+OBJS += kernel/vfs/ramfs.o kernel/vfs/fd.o kernel/vfs/sys_vfs.o

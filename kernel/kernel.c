@@ -132,3 +132,9 @@ void kernel_main(void) {
         __asm__ volatile("hlt");
     }
 }
+#include <mcsos/vfs/vfs.h>
+
+// Di dalam fungsi kmain/kernel_init:
+static mcs_ramfs_t g_rootfs;
+mcs_ramfs_init(&g_rootfs);
+klog("[M13] Root RAMFS initialized\n");
