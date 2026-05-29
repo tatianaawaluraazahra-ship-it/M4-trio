@@ -1,3 +1,4 @@
+#include "m11_elf_loader.h"
 #include "mcsos_thread.h"
 #include "mcsos/syscall.h"
 
@@ -71,7 +72,28 @@ static void demo_thread_b(void *arg) {
     }
 }
 
+
+void m11_kernel_smoke_test_elf_loader(const void *img, unsigned long size) {
+    struct m11_user_region region;
+    region.base = 0x00400000;
+    region.limit = 0x8000000000;
+    struct m11_process_image_plan plan;
+    int rc = m11_elf64_plan_load(img, size, region, &plan);
+    if (rc == 0) {
+        klog("[M11] ELF loader smoke test plan passed\n");
+    }
+}
+
 void kernel_main(void) {
+
+    static unsigned char dummy_elf[128] = {
+        0x7f, 'E', 'L', 'F', 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        2, 0, 62, 0, 1, 0, 0, 0, 0, 1, 40, 0, 0, 0, 0, 0,
+        64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 64, 0, 56, 0, 1, 0, 0, 0, 0, 0
+    };
+    m11_kernel_smoke_test_elf_loader(dummy_elf, 128);
+
     // Inisialisasi M9 Layer Scheduler
     mcsos_scheduler_init(&g_sched, &g_boot_thread);
     mcsos_thread_prepare(&g_thread_a, "demo-a", demo_thread_a, 0, g_stack_a, sizeof(g_stack_a), g_sched.next_id++);
