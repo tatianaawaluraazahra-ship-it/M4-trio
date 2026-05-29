@@ -1,0 +1,25 @@
+CC ?= clang
+HOST_CFLAGS := -std=c17 -Wall -Wextra -Werror -O2 -g -Iinclude
+TARGET_CFLAGS := -target x86_64-unknown-none-elf -std=c17 -Wall -Wextra -Werror -O2 -g -ffreestanding -fno-stack-protector -fno-pic -mno-red-zone -Iinclude -c
+
+.PHONY: all clean
+
+all: m12_host_test freestanding
+
+m12_host_test: kernel/sync/lockdep.c kernel/sync/spinlock.c kernel/sync/mutex.c tests/test_sync_host.c
+	$(CC) $(HOST_CFLAGS) $^ -o $@
+	./$@
+
+freestanding: build/m12_lockdep.o build/m12_spinlock.o build/m12_mutex.o
+
+build/m12_lockdep.o: kernel/sync/lockdep.c
+	mkdir -p build && $(CC) $(TARGET_CFLAGS) $< -o $@
+
+build/m12_spinlock.o: kernel/sync/spinlock.c
+	mkdir -p build && $(CC) $(TARGET_CFLAGS) $< -o $@
+
+build/m12_mutex.o: kernel/sync/mutex.c
+	mkdir -p build && $(CC) $(TARGET_CFLAGS) $< -o $@
+
+clean:
+	rm -rf build m12_host_test
