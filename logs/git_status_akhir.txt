@@ -1,0 +1,4 @@
+ M Makefile
+ D build/m8/git_diff.patch
+?? logs/
+?? tests/test_syscall_host.c

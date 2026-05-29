@@ -1,0 +1,3 @@
+ Makefile                | 85 +++++++++++++++++++++++++++++++++++++++++++++++++
+ build/m8/git_diff.patch | 61 -----------------------------------
+ 2 files changed, 85 insertions(+), 61 deletions(-)
