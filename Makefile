@@ -1,38 +1,37 @@
-CC ?= clang
-CFLAGS_COMMON := -std=c17 -Wall -Wextra -Werror -Iinclude
-CFLAGS_KERNEL := $(CFLAGS_COMMON) -ffreestanding -fno-builtin -fno-stack-protector -mno-red-zone
-BUILD_DIR := build/m8
+CC ?= cc
+CLANG ?= clang
+CFLAGS_HOST := -std=c17 -Wall -Wextra -Werror -Iinclude -O2
+CFLAGS_FREESTANDING := --target=x86_64-elf -std=c17 -ffreestanding -fno-builtin -fno-stack-protector -fno-pic -mno-red-zone -Wall -Wextra -Werror -Iinclude -O2 -c
 
-.PHONY: all check clean m8-clean m8-kmem-host-test m8-kmem-freestanding m8-audit m8-all run
+SRC := kernel/block/blk.c kernel/block/ramblk.c kernel/block/bcache.c
+OBJ := build/blk.o build/ramblk.o build/bcache.o
 
-all: m8-kmem-host-test
+.PHONY: all host-test freestanding audit clean
 
-check: m8-kmem-host-test
+all: host-test freestanding audit
 
-clean: m8-clean
-	rm -rf build
+host-test: build/test_m14_block
+	./build/test_m14_block
 
-m8-clean:
-	rm -rf $(BUILD_DIR)
+build/test_m14_block: tests/host/test_m14_block.c $(SRC) include/mcsos/block.h
+	mkdir -p build
+	$(CC) $(CFLAGS_HOST) tests/host/test_m14_block.c $(SRC) -o $@
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+freestanding: $(OBJ)
 
-m8-kmem-freestanding: | $(BUILD_DIR)
-	$(CC) $(CFLAGS_KERNEL) -c kernel/mm/kmem.c -o $(BUILD_DIR)/kmem.freestanding.o
+build/%.o: kernel/block/%.c include/mcsos/block.h
+	mkdir -p build
+	$(CLANG) $(CFLAGS_FREESTANDING) $< -o $@
 
-m8-kmem-host-test: | $(BUILD_DIR)
-	$(CC) $(CFLAGS_COMMON) -DMCSOS_HOST_TEST tests/test_kmem.c kernel/mm/kmem.c -o $(BUILD_DIR)/test_kmem
-	./$(BUILD_DIR)/test_kmem | tee $(BUILD_DIR)/test_kmem.log
+audit: freestanding
+	ld -r -o build/m14_block_layer.o $(OBJ)
+	nm -u build/m14_block_layer.o > artifacts/m14_nm_undefined.txt
+	readelf -h build/m14_block_layer.o > artifacts/m14_readelf_block.txt
+	objdump -dr build/m14_block_layer.o > artifacts/m14_objdump_block.txt
+	sha256sum $(OBJ) build/m14_block_layer.o build/test_m14_block > artifacts/m14_sha256.txt
+	test ! -s artifacts/m14_nm_undefined.txt
 
-m8-audit: m8-kmem-freestanding
-	nm -u $(BUILD_DIR)/kmem.freestanding.o | tee $(BUILD_DIR)/nm_u.txt
-	test ! -s $(BUILD_DIR)/nm_u.txt
-	readelf -h $(BUILD_DIR)/kmem.freestanding.o > $(BUILD_DIR)/readelf_h.txt
-	objdump -dr $(BUILD_DIR)/kmem.freestanding.o > $(BUILD_DIR)/kmem.objdump.txt
-
-m8-all: m8-kmem-host-test m8-audit
-
-run: | $(BUILD_DIR)
-	@echo "Menjalankan QEMU Smoke Test..."
-	@echo "M8 checkpoint reached"
+clean:
+	rm -rf build artifacts/*
+KERNEL_C_SRCS += kernel/block/blk.c kernel/block/ramblk.c kernel/block/bcache.c
+KERNEL_CFLAGS += -Iinclude
