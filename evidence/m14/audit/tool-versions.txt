@@ -1,0 +1,29 @@
+=== SYSTEM AUDIT M14 ===
+Linux LAPTOP-5CGQ15P3 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64 GNU/Linux
+
+PRETTY_NAME="Ubuntu 26.04 LTS"
+NAME="Ubuntu"
+VERSION_ID="26.04"
+VERSION="26.04 (Resolute Raccoon)"
+VERSION_CODENAME=resolute
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+
+Ubuntu clang version 21.1.8 (6ubuntu1)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/lib/llvm-21/bin
+gcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+GNU ld (GNU Binutils for Ubuntu) 2.46
+Ubuntu LLD 21.1.8 (compatible with GNU linkers)
+GNU Make 4.4.1
+QEMU emulator version 10.2.1 (Debian 1:10.2.1+ds-1ubuntu3)
+GNU gdb (Ubuntu 17.1-2ubuntu1) 17.1
+GNU nm (GNU Binutils for Ubuntu) 2.46
+GNU readelf (GNU Binutils for Ubuntu) 2.46
+GNU objdump (GNU Binutils for Ubuntu) 2.46
+git version 2.53.0
+
+Git Commit Hash:
+6fbbe7cb4239dcbb0e8ab1f77c5b4bc660cd5975
