@@ -18,16 +18,7 @@ for d in "${required_dirs[@]}"; do
     echo "[OK] direktori $d tersedia"
   fi
 done
-required_markers=(
-  "kernel_main"
-  "panic"
-  "idt"
-  "pmm"
-  "vmm"
-  "kmalloc"
-  "sched"
-  "syscall"
-)
+required_markers=("kernel_main" "panic" "idt" "pmm" "vmm" "kmalloc" "sched" "syscall")
 for m in "${required_markers[@]}"; do
   if grep -R "${m}" -n kernel arch include 2>/dev/null | head -n 1 >/dev/null; then
     echo "[OK] marker ditemukan: $m"
