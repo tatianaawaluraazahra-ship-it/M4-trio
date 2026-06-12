@@ -31,7 +31,22 @@ audit: freestanding
 	sha256sum $(OBJ) build/m14_block_layer.o build/test_m14_block > artifacts/m14_sha256.txt
 	test ! -s artifacts/m14_nm_undefined.txt
 
+<<<<<<< HEAD
 clean:
 	rm -rf build artifacts/*
 KERNEL_C_SRCS += kernel/block/blk.c kernel/block/ramblk.c kernel/block/bcache.c
 KERNEL_CFLAGS += -Iinclude
+=======
+m8-audit: m8-kmem-freestanding
+	nm -u $(BUILD_DIR)/kmem.freestanding.o | tee $(BUILD_DIR)/nm_u.txt
+	test ! -s $(BUILD_DIR)/nm_u.txt
+	readelf -h $(BUILD_DIR)/kmem.freestanding.o > $(BUILD_DIR)/readelf_h.txt
+	objdump -dr $(BUILD_DIR)/kmem.freestanding.o > $(BUILD_DIR)/kmem.objdump.txt
+
+m8-all: m8-kmem-host-test m8-audit
+
+run: | $(BUILD_DIR)
+	@echo "Menjalankan QEMU Smoke Test..."
+	@echo "M8 checkpoint reached"
+OBJS += kernel/vfs/ramfs.o kernel/vfs/fd.o kernel/vfs/sys_vfs.o
+>>>>>>> praktikum-m13-vfs-ramfs
