@@ -24,4 +24,3 @@ artifacts/m15/mcsfs1.rel.o: artifacts/m15/mcsfs1.o
 
 clean:
 	rm -rf artifacts/m15
-
