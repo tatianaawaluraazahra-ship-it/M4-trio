@@ -25,3 +25,12 @@ artifacts/m15/mcsfs1.rel.o: artifacts/m15/mcsfs1.o
 clean:
 	rm -rf artifacts/m15
 
+# --- Integrasi M16 ---
+M16_SRC := kernel/fs/mcsfs1j/m16_mcsfs_journal.c kernel/fs/mcsfs1j/mcsfs1j_adapter.c
+M16_OBJ := $(M16_SRC:.c=.o)
+
+# Aturan untuk membuat file .o dari .c
+kernel/fs/mcsfs1j/%.o: kernel/fs/mcsfs1j/%.c
+	$(CC) $(FREESTANDING_CFLAGS) -I. -Iinclude -Ikernel/include -c $< -o $@
+# Tambahkan m16_all ke target utama
+m16-all: $(M16_OBJ)
